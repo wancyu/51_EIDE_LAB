@@ -1,0 +1,115 @@
+/**
+ * @file main.c
+ * @author qinglan
+ * @brief 8x8点阵动画演示
+ */
+
+#include <REGX52.H>
+#include "delay.h"
+#include "matrix8x8.h"
+
+/**
+ * @brief 动画数据，笑脸
+ * @note code代表写入flash，之后的代码不可修改
+ */
+unsigned char code animation_smile_face[]={
+    0x3C,0x42,0xA9,0x85,0x85,0xA9,0x42,0x3C,
+};
+
+/**
+ * @brief 动画数据，流动动画数据，大写 hello world
+ */
+unsigned char code animation_a[] = {
+    // h
+    0x7F, 0x08, 0x08, 0x08, 0x7F, 0x00, 0x00, 0x00,
+    // e
+    0x7F, 0x49, 0x49, 0x49, 0x41, 0x00, 0x00, 0x00,
+    // l
+    0x7F, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00,
+    // l
+    0x7F, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00,
+    // o
+    0x3E, 0x41, 0x41, 0x41, 0x3E, 0x00, 0x00, 0x00,
+    // (space)
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    // w
+    0x7E, 0x01, 0x0E, 0x01, 0x7E, 0x00, 0x00, 0x00,
+    // o
+    0x3E, 0x41, 0x41, 0x41, 0x3E, 0x00, 0x00, 0x00,
+    // r
+    0x7F, 0x48, 0x4C, 0x4A, 0x31, 0x00, 0x00, 0x00,
+    // l
+    0x7F, 0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00,
+    // d
+    0x7F, 0x41, 0x41, 0x41, 0x3E, 0x00, 0x00, 0x00,
+    // !
+    0x00, 0x7D, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
+
+
+/**
+ * @brief 动画数据，流动动画数据，笑脸和哭脸，建议逐帧播放
+ */
+unsigned char code animation_b[]={
+    0x3C,0x42,0xA9,0x85,0x85,0xA9,0x42,0x3C,
+    0x3C,0x42,0xA1,0x85,0x85,0xA1,0x42,0x3C,
+    0x3C,0x42,0xA5,0x89,0x89,0xA5,0x42,0x3C,
+};
+
+/**
+ * @brief 显示一帧画面
+ * @param animal 需传入一个数组，八个十六进制字节
+ */
+void display_once(unsigned char code *animal)
+{
+    unsigned char i;
+    // 依次显示8列数据
+    for(i=0;i<8;i++)
+    {
+        Matrix8x8_ShowColumn(i,animal[i]);
+    }
+}
+
+/**
+ * @brief 显示流动动画效果
+ * @param animal 需传入一个数组，十六进制字节
+ * @param len 数组长度
+ * @note offset和count为static变量，动画流动时记忆状态
+ * offset偏移量可以调整为1或8，实现流动效果和逐帧播放效果
+ */
+void display_more(unsigned char code *animal, unsigned char len)
+{
+    static unsigned char offset = 0, count = 0; // 静态变量，保存偏移和计数
+    unsigned char i;
+    // 显示当前偏移位置的8列数据
+    for(i=0;i<8;i++)
+    {
+        Matrix8x8_ShowColumn(i, animal[i + offset]);
+    }
+    count++; // 计次延时，控制流动速度
+    if(count > 15)
+    {
+        count = 0;
+        offset += 1; // 偏移+1，实现流动效果
+		//offset += 8; // 偏移+1，实现逐帧播放效果
+        // 如果偏移超过最大范围，回到起始位置
+        if(offset > (len-8))	//减去8.放置len+i越界
+        {
+            offset = 0;
+        }
+    }
+}
+
+void main()
+{
+	unsigned char len = 0;
+	Matrix8x8_Init(); // 初始化点阵
+    len = sizeof(animation_a) / sizeof(animation_a[0]); // 计算动画数组长度
+    while(1)
+    {
+        display_more(animation_a, len); // 循环显示动画
+    }
+}
+
+
