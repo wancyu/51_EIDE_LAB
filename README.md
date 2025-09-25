@@ -1,4 +1,4 @@
-# MCU51-Labs
+# 51_EIDE_LAB
 
 个人 51 单片机实验练习合集，并提供一套可复用的通用函数库。
 
@@ -9,7 +9,7 @@
 
 ## 使用说明
 1. 克隆仓库：
-   git clone https://github.com/wancyu/MCU51-Labs.git
+   git clone https://github.com/wancyu/51_EIDE_LAB.git
 2. 编译实验：
    cd src/LED_Blink
    make
